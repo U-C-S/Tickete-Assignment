@@ -1,0 +1,26 @@
+{
+  "scripts": {
+    "dev": "nodemon server.ts",
+    "dev:tsnode": "ts-node server.ts",
+    "start:prod": "tsc && node dist/server.js",
+    "start:serverless": "tsc && node dist/serverless.js",
+    "vercel-build": "prisma generate && tsc",
+    "build": "tsc",
+    "init": "prisma init",
+    "pull": "prisma db pull",
+    "generate": "prisma generate"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.4.1",
+    "@prisma/client": "^5.6.0",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "nodemon": "^3.0.1",
+    "prisma": "^5.6.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
+}
