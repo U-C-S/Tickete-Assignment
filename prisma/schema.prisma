@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Slots {
+  id              Int               @id @default(autoincrement())
+  startDate       DateTime
+  startTime       String
+  // remaining       Int
+  paxAvailability PaxAvailability[]
+}
+
+model PaxAvailability {
+  id Int @id @default(autoincrement())
+
+  slotsId Int
+  Slots   Slots? @relation(fields: [slotsId], references: [id])
+
+  max         Int
+  min         Int
+  remaining   Int
+  type        String
+  description String
+  name        String
+
+  price PaxPrice?
+}
+
+model PaxPrice {
+  id            Int    @id @default(autoincrement())
+  finalPrice    Float
+  originalPrice Float
+  currency      String
+
+  pax PaxAvailability? @relation(fields: [id], references: [id])
+}

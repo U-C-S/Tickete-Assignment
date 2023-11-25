@@ -1,14 +1,14 @@
-type LeapApiResponse = Item[];
+export type LeapApiResponse = Array<ISlotResponse>;
 
-interface Item {
+export interface ISlotResponse {
   startDate: string;
   startTime: string;
-  endTime: string;
-  providerSlotId: string;
+  // endTime: string;
+  // providerSlotId: string;
   remaining: number;
-  currencyCode: string;
-  variantId: number;
-  paxAvailability: IPaxAvailability[];
+  // currencyCode: string;
+  // variantId: number;
+  paxAvailability: Array<IPaxAvailability>;
 }
 
 interface IPaxAvailability {
@@ -23,7 +23,7 @@ interface IPaxAvailability {
 }
 
 interface IPrice {
-  discount: number;
+  // discount: number;
   finalPrice: number;
   originalPrice: number;
   currencyCode: string;
