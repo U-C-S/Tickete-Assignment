@@ -15,7 +15,7 @@ async function fetchInventory(id: number, date: string) {
       }
     );
     let inventory = req.data as LeapApiResponse;
-    StoreInventory(inventory);
+    await StoreInventory(inventory);
   } catch (e: any) {
     console.error(`Error fetching product ${id} on ${date}`);
     // console.error(e.message);
