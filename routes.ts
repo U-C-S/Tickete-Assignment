@@ -5,6 +5,12 @@ export async function routes(fastify: FastifyInstance) {
     const { id } = req.params as { id: string };
     const { date } = req.query as { date: string };
 
+    if (!date) {
+      return res.code(400).send({
+        message: "Date is required",
+      });
+    }
+
     let slots = await fastify.prisma.slots.findMany({
       where: {
         productId: parseInt(id),
@@ -14,6 +20,7 @@ export async function routes(fastify: FastifyInstance) {
         paxAvailability: {
           include: {
             price: true,
+            content: true,
           },
         },
       },

@@ -4,7 +4,7 @@ export interface ISlotResponse {
   startDate: string;
   startTime: string;
   // endTime: string;
-  // providerSlotId: string;
+  providerSlotId: string; //unique identifer for the slot
   remaining: number;
   // currencyCode: string;
   // variantId: number;

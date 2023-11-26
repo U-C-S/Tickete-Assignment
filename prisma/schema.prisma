@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
 model Slots {
@@ -13,30 +12,38 @@ model Slots {
   startDate       DateTime
   startTime       String
   productId       Int
+  providerSlotId  String
   paxAvailability PaxAvailability[]
 }
 
 model PaxAvailability {
-  id Int @id @default(autoincrement())
-
-  slotsId Int
-  Slots   Slots? @relation(fields: [slotsId], references: [id])
-
-  max         Int
-  min         Int
-  remaining   Int
-  type        String
-  description String
-  name        String
-
-  price PaxPrice?
+  id                 Int               @id @default(autoincrement())
+  paxContentId       Int?
+  paxPriceProfilesId Int?
+  slotsId            Int
+  content            PaxContent?       @relation(fields: [paxContentId], references: [id])
+  price              PaxPriceProfiles? @relation(fields: [paxPriceProfilesId], references: [id])
+  slots              Slots             @relation(fields: [slotsId], references: [id])
+  max                Int
+  min                Int
+  remaining          Int
+  isPrimary          Boolean?
 }
 
-model PaxPrice {
-  id            Int    @id @default(autoincrement())
-  finalPrice    Float
-  originalPrice Float
-  currency      String
+model PaxPriceProfiles {
+  id              Int               @id @default(autoincrement())
+  finalPrice      Float
+  originalPrice   Float
+  currency        String
+  PaxAvailability PaxAvailability[]
 
-  pax PaxAvailability? @relation(fields: [id], references: [id])
+  @@unique([finalPrice, originalPrice])
+}
+
+model PaxContent {
+  id              Int               @id @default(autoincrement())
+  type            String            @unique
+  description     String
+  name            String
+  PaxAvailability PaxAvailability[]
 }
