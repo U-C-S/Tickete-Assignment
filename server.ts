@@ -1,20 +1,14 @@
 import { FastifyServerOptions } from "fastify";
 import { buildFastifyServer } from "./app";
 
-let serverOpts: FastifyServerOptions = {
-  logger: {
-    transport: {
-      target: "pino-pretty",
-      options: {
-        ignore: "pid, hostname",
-        translateTime: "HH:MM:ss",
-      },
-    },
-  },
-};
+// let serverOpts: FastifyServerOptions = {
+//   logger: {
+//     info: ,
+//   },
+// };
 
 // server
-buildFastifyServer(serverOpts).listen(
+buildFastifyServer().listen(
   { port: parseInt(process.env.PORT || "4000") },
   (err, address) => {
     if (err) {

@@ -12,7 +12,7 @@ model Slots {
   id              Int               @id @default(autoincrement())
   startDate       DateTime
   startTime       String
-  // remaining       Int
+  productId       Int
   paxAvailability PaxAvailability[]
 }
 

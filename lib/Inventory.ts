@@ -15,7 +15,7 @@ async function fetchInventory(id: number, date: string) {
       }
     );
     let inventory = req.data as LeapApiResponse;
-    await StoreInventory(inventory);
+    await StoreInventory(inventory, id);
   } catch (e: any) {
     console.error(`Error fetching product ${id} on ${date}`);
     // console.error(e.message);
@@ -23,7 +23,7 @@ async function fetchInventory(id: number, date: string) {
   }
 }
 
-async function StoreInventory(inventory: LeapApiResponse) {
+async function StoreInventory(inventory: LeapApiResponse, productId: number) {
   const prisma = new PrismaClient();
 
   if (inventory.length === 0 || !inventory) return;
@@ -33,6 +33,7 @@ async function StoreInventory(inventory: LeapApiResponse) {
       data: {
         startDate: new Date(slot.startDate),
         startTime: slot.startTime,
+        productId: productId,
         paxAvailability: {
           create: slot.paxAvailability.map((pax) => {
             return {

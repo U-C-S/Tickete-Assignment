@@ -2,6 +2,7 @@ import fastifyCors from "@fastify/cors";
 import fastify, { FastifyInstance, FastifyServerOptions } from "fastify";
 
 import prismaPlugin from "./prisma";
+import { routes } from "./routes";
 
 export default async function appFactory(fastify: FastifyInstance) {
   const app = fastify;
@@ -12,7 +13,7 @@ export default async function appFactory(fastify: FastifyInstance) {
     origin: "*",
   });
 
-  // app.register(someRoutes, { prefix: "/api/v1/experience" });
+  app.register(routes, { prefix: "/api/v1/experience" });
   app.get("/test", () => ({ hello: "world" }));
 
   return app;
