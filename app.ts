@@ -27,6 +27,17 @@ export async function buildFastifyServer(opts: FastifyServerOptions = {}): Promi
 
   app.register(routes, { prefix: "/api/v1/experience" });
   app.get("/test", () => ({ hello: "world" }));
+  app.get("/sync/pause", () => {
+    app.scheduler.stop();
+    return { message: "paused" };
+  });
+  app.get("/sync/resume", () => {
+    app.scheduler.startById("invsync");
+    return { message: "resumed" };
+  });
+  app.get("/sync/status", () => {
+    return { status: app.scheduler.getById("invsync").getStatus() };
+  });
 
   await app.ready();
   app.scheduler.addSimpleIntervalJob(job);
@@ -65,4 +76,7 @@ const InventorySyncTask = new AsyncTask("DailyTask", () => {
 });
 
 //every 15mins
-const job = new SimpleIntervalJob({ minutes: 15 }, InventorySyncTask, { preventOverrun: true });
+const job = new SimpleIntervalJob({ minutes: 1 }, InventorySyncTask, {
+  preventOverrun: true,
+  id: "invsync",
+});
