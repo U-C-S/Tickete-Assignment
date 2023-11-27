@@ -42,8 +42,10 @@ model PaxPriceProfiles {
 
 model PaxContent {
   id              Int               @id @default(autoincrement())
-  type            String            @unique
+  type            String
   description     String
   name            String
   PaxAvailability PaxAvailability[]
+
+  @@unique([type, name, description])
 }

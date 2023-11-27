@@ -1,13 +1,15 @@
-import { AVAILABLE_IDS, fetchInventoryBetweenDates } from "../lib/Inventory";
+import { AVAILABLE_IDS, fetchAllInventory, fetchInventoryBetweenDates } from "../lib/Inventory";
 import "dotenv/config";
 
-const today = new Date();
-
-AVAILABLE_IDS.forEach(async (id) => {
-  let today = new Date();
+(async () => {
+  const today = new Date();
 
   let afterAMonth = new Date();
   afterAMonth.setDate(today.getDate() + 30);
 
-  await fetchInventoryBetweenDates(id, today, afterAMonth);
-});
+  const startTime = new Date().getTime();
+  console.log(`Started at time ${startTime}`);
+  await fetchAllInventory(today, afterAMonth);
+  const endTime = new Date().getTime();
+  console.log(`Time taken: ${(endTime - startTime) / 1000}s`);
+})();
