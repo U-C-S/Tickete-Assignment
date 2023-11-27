@@ -39,7 +39,7 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
   for (const chunk of chunks) {
     await Promise.all(
       chunk.map(async (item) => {
-        console.log(`- Fetching inventory for product ${item.id} on ${item.date}`);
+        console.log(`-> Fetching inventory for product ${item.id} on ${item.date}`);
         let inv = await fetchInventory(item.id, item.date);
         return StoreInventory(inv, item.id, prisma);
       })
@@ -63,14 +63,16 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
       const resetTime = req.data.rateLimitState.reset;
       const now = Date.now();
       let diff = resetTime - now;
-      console.log(`Rate limited, waiting ${diff / 1000} seconds...to fetch ${id} on ${date}`);
-      await new Promise((resolve) => setTimeout(resolve, diff + 2000));
+
+      console.log(`Rate limited; waiting ${diff / 1000} seconds...to fetch ${id}-${date}`);
+      await new Promise((resolve) => setTimeout(resolve, diff + 2000)); // add 2sec to be safe
+
       return fetchInventory(id, date);
     }
 
     return req.data;
   } catch (e: any) {
-    console.error(`❌ Error fetching product ${id} on ${date}`);
+    console.error(`❌ Error fetching product ${id}-${date}`);
     throw e;
   }
 }
@@ -144,11 +146,11 @@ async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: Pr
       // Handle a race condition, hence retry the query.
       // explanation: https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#remarks-17
       if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
-        console.error(`❌ Failed to store product ${id} on ${slot.startDate}, retrying...`);
+        console.error(`❌ Failed to store product ${id}-${slot.startDate}, retrying...`);
         await StoreQuery(slot);
-        console.log(`✅ Stored product ${id} on ${slot.startDate}`);
+        console.log(`✅ Stored product ${id}-${slot.startDate}`);
       } else {
-        console.error(`❌ Error storing product ${id} on ${slot.startDate}`);
+        console.error(`❌ Error storing product ${id}-${slot.startDate}`);
         throw e;
       }
     }

@@ -1,7 +1,7 @@
 import { AsyncTask, SimpleIntervalJob } from "toad-scheduler";
 import { fetchAllInventory } from "../lib/Inventory";
 
-let counter = 0; // store this state in db
+let counter = 0; // TODO: store this state in db for persistence
 
 const InventorySyncTask = new AsyncTask("DailyTask", () => {
   const today = new Date();
@@ -10,7 +10,7 @@ const InventorySyncTask = new AsyncTask("DailyTask", () => {
 
   if (counter % 96 === 0) {
     //every 24hrs
-    console.log("Monthly Inventory Fetching....");
+    console.log(`Monthly Inventory Fetching....${counter}`);
 
     const afterAMonth = new Date();
     afterAMonth.setDate(today.getDate() + 30);
@@ -18,7 +18,7 @@ const InventorySyncTask = new AsyncTask("DailyTask", () => {
     return fetchAllInventory(today, afterAMonth);
   } else if (counter % 16 === 0) {
     //every 4hrs
-    console.log("Weekly Inventory Fetching....");
+    console.log(`Weekly Inventory Fetching....${counter}`);
 
     const afterAWeek = new Date();
     afterAWeek.setDate(today.getDate() + 7);
@@ -26,7 +26,7 @@ const InventorySyncTask = new AsyncTask("DailyTask", () => {
     return fetchAllInventory(today, afterAWeek);
   } else {
     // default and runs every 15mins
-    console.log("Daily Inventory Fetching....");
+    console.log(`Daily Inventory Fetching....${counter}`);
 
     return fetchAllInventory(today);
   }

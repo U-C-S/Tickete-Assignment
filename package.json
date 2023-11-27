@@ -3,7 +3,7 @@
     "dev": "nodemon server.ts",
     "start:prod": "node dist/server.js",
     "vercel-build": "prisma generate && tsc",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "init": "prisma init",
     "generate": "prisma generate"
   },
