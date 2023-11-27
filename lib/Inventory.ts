@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
-import { LeapApiResponse } from "../types/LeapApiResponse";
+import { ISlotResponse, LeapApiResponse } from "../types/LeapApiResponse";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const AVAILABLE_IDS = [14, 15];
 
@@ -96,60 +97,68 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
 async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: PrismaClient) {
   if (inventory.length === 0 || !inventory) return;
 
-  for (const slot of inventory) {
-    try {
-      await prisma.slots.create({
-        data: {
-          startDate: new Date(slot.startDate),
-          startTime: slot.startTime,
-          productId: id,
-          providerSlotId: slot.providerSlotId,
-          paxAvailability: {
-            create: slot.paxAvailability.map((pax) => {
-              return {
-                max: pax.max,
-                min: pax.min,
-                remaining: pax.remaining,
-                isPrimary: pax.isPrimary,
-                price: {
-                  connectOrCreate: {
-                    create: {
-                      currency: pax.price.currencyCode,
+  const Store = async (slot: ISlotResponse) => {
+    await prisma.slots.create({
+      data: {
+        startDate: new Date(slot.startDate),
+        startTime: slot.startTime,
+        productId: id,
+        providerSlotId: slot.providerSlotId,
+        paxAvailability: {
+          create: slot.paxAvailability.map((pax) => {
+            return {
+              max: pax.max,
+              min: pax.min,
+              remaining: pax.remaining,
+              isPrimary: pax.isPrimary,
+              price: {
+                connectOrCreate: {
+                  create: {
+                    currency: pax.price.currencyCode,
+                    finalPrice: pax.price.finalPrice,
+                    originalPrice: pax.price.originalPrice,
+                  },
+                  where: {
+                    finalPrice_originalPrice: {
                       finalPrice: pax.price.finalPrice,
                       originalPrice: pax.price.originalPrice,
                     },
-                    where: {
-                      finalPrice_originalPrice: {
-                        finalPrice: pax.price.finalPrice,
-                        originalPrice: pax.price.originalPrice,
-                      },
-                    },
                   },
                 },
-                content: {
-                  connectOrCreate: {
-                    create: {
+              },
+              content: {
+                connectOrCreate: {
+                  create: {
+                    type: pax.type,
+                    description: pax.description,
+                    name: pax.name,
+                  },
+                  where: {
+                    type_name_description: {
                       type: pax.type,
-                      description: pax.description,
                       name: pax.name,
-                    },
-                    where: {
-                      type_name_description: {
-                        type: pax.type,
-                        name: pax.name,
-                        description: pax.description,
-                      },
+                      description: pax.description,
                     },
                   },
                 },
-              };
-            }),
-          },
+              },
+            };
+          }),
         },
-      });
+      },
+    });
+  };
+
+  for (const slot of inventory) {
+    try {
+      await Store(slot);
     } catch (e: any) {
-      console.error(`Error storing product ${id} on ${slot.startDate}`);
-      console.error(e.message);
+      if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
+        await Store(slot);
+      } else {
+        console.error(`❌ Error storing product ${id} on ${slot.startDate}`);
+        console.error(e.message);
+      }
     }
   }
 }
