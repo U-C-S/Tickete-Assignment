@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-export async function routes(fastify: FastifyInstance) {
+export default async function slotRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/slots", async (req, res) => {
     const { id } = req.params as { id: string };
     const { date } = req.query as { date: string };
@@ -42,11 +42,7 @@ export async function routes(fastify: FastifyInstance) {
         productId: parseInt(id),
         startDate: {
           gte: today,
-          lte: new Date(
-            today.getFullYear(),
-            today.getMonth() + 2,
-            today.getDate()
-          ),
+          lte: new Date(today.getFullYear(), today.getMonth() + 2, today.getDate()),
         },
       },
     });

@@ -25,19 +25,17 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
     for (const id of availableIds) {
       if (OneChunk.length === chunkSize) {
         chunks.push(structuredClone(OneChunk)); // structured clone to avoid reference issues, works above node 17
-        // console.log(`Chunk full with ${OneChunk.length}, pushing to chunks - now ${chunks.length} chunks`);
         OneChunk.length = 0;
       }
 
       OneChunk.push({ id, date: date.toISOString().split("T")[0] });
-      // console.log(`+ added date ${date.toISOString().split("T")[0]} for product ${id}`);
     }
 
     date.setDate(date.getDate() + 1);
   }
+
   chunks.push(OneChunk);
 
-  // fetch inventory for each chunk
   for (const chunk of chunks) {
     await Promise.all(
       chunk.map(async (item) => {
@@ -46,8 +44,6 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
         return StoreInventory(inv, item.id, prisma);
       })
     );
-
-    // Promise.all(x.map((inv, i) => StoreInventory(inv, chunk[i].id, prisma)));
   }
 }
 
@@ -82,7 +78,7 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
 async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: PrismaClient) {
   if (inventory.length === 0 || !inventory) return;
 
-  const Store = async (slot: ISlotResponse) => {
+  const StoreQuery = async (slot: ISlotResponse) => {
     await prisma.slots.upsert({
       where: {
         productId_providerSlotId: {
@@ -143,17 +139,16 @@ async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: Pr
 
   for (const slot of inventory) {
     try {
-      await Store(slot);
+      await StoreQuery(slot);
     } catch (e: any) {
       // Handle a race condition, hence retry the query.
       // explanation: https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#remarks-17
       if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
         console.error(`❌ Failed to store product ${id} on ${slot.startDate}, retrying...`);
-        await Store(slot);
+        await StoreQuery(slot);
         console.log(`✅ Stored product ${id} on ${slot.startDate}`);
       } else {
         console.error(`❌ Error storing product ${id} on ${slot.startDate}`);
-        // console.error(e.message);
         throw e;
       }
     }
