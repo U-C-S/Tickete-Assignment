@@ -1,4 +1,4 @@
-import { AVAILABLE_IDS, fetchAllInventory, fetchInventoryBetweenDates } from "../lib/Inventory";
+import { fetchAllInventory } from "../lib/Inventory";
 import "dotenv/config";
 
 (async () => {
