@@ -37,9 +37,11 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
   chunks.push(OneChunk);
 
   for (const chunk of chunks) {
+    console.log(`✨ Executing ${chunks.indexOf(chunk) + 1} of ${chunks.length} chunks...`);
+
     await Promise.all(
       chunk.map(async (item) => {
-        console.log(`-> Fetching inventory for product ${item.id} on ${item.date}`);
+        console.log(`--> Fetching inventory for product ${item.id} on ${item.date}`);
         let inv = await fetchInventory(item.id, item.date);
         return StoreInventory(inv, item.id, prisma);
       })
@@ -64,7 +66,7 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
       const now = Date.now();
       let diff = resetTime - now;
 
-      console.log(`Rate limited; waiting ${diff / 1000} seconds...to fetch ${id}-${date}`);
+      console.log(`--> ⚠️ Rate limited; waiting ${diff / 1000} seconds...to fetch ${id}-${date}`);
       await new Promise((resolve) => setTimeout(resolve, diff + 2000)); // add 2sec to be safe
 
       return fetchInventory(id, date);
@@ -146,9 +148,9 @@ async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: Pr
       // Handle a race condition, hence retry the query.
       // explanation: https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#remarks-17
       if (e instanceof PrismaClientKnownRequestError && e.code === "P2002") {
-        console.error(`❌ Failed to store product ${id}-${slot.startDate}, retrying...`);
+        console.error(`--> ❌ Failed to store product ${id}-${slot.startDate}, retrying...`);
         await StoreQuery(slot);
-        console.log(`✅ Stored product ${id}-${slot.startDate}`);
+        console.log(`--> ✅ Stored product ${id}-${slot.startDate}`);
       } else {
         console.error(`❌ Error storing product ${id}-${slot.startDate}`);
         throw e;

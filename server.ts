@@ -7,7 +7,15 @@ const port = parseInt(process.env.PORT || "4000");
 // IIFE
 (async function () {
   let server = await buildFastifyServer({
-    logger: true,
+    logger: {
+      transport: {
+        target: "pino-pretty",
+        options: {
+          ignore: "pid,hostname",
+          translateTime: "HH:MM:ss",
+        },
+      },
+    },
   });
 
   server.listen({ host, port }, (err, address) => {
