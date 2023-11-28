@@ -16,17 +16,28 @@ export default async function slotRoutes(fastify: FastifyInstance) {
         productId: parseInt(id),
         startDate: new Date(date),
       },
-      include: {
+      select: {
+        id: true,
+        startDate: true,
+        startTime: true,
+        providerSlotId: true,
         paxAvailability: {
-          include: {
-            price: true,
+          select: {
+            max: true,
+            min: true,
+            remaining: true,
+            isPrimary: true,
             content: true,
+            price: true,
           },
         },
       },
     });
 
-    return slots;
+    return {
+      id: parseInt(id),
+      slots,
+    };
   });
 
   fastify.get("/:id/dates", async (req, res) => {

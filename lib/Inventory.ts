@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
-import { ISlotResponse, LeapApiResponse } from "../types/LeapApiResponse";
+import { ISlotLeapResponse, LeapApiResponse } from "../types/LeapApiResponse";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const AVAILABLE_IDS = [14, 15];
@@ -41,7 +41,6 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
 
     await Promise.all(
       chunk.map(async (item) => {
-        console.log(`--> Fetching inventory for product ${item.id} on ${item.date}`);
         let inv = await fetchInventory(item.id, item.date);
         return StoreInventory(inv, item.id, prisma);
       })
@@ -51,6 +50,8 @@ async function fetchAllInventory(startDate: Date, endDate?: Date) {
 
 async function fetchInventory(id: number, date: string): Promise<LeapApiResponse> {
   try {
+    console.log(`--> Fetching inventory for product ${id} on ${date}`);
+
     let req = await axios.get<LeapApiResponse>(
       `https://leap-api.tickete.co/api/v1/inventory/${id}?date=${date}`,
       {
@@ -66,7 +67,7 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
       const now = Date.now();
       let diff = resetTime - now;
 
-      console.log(`--> ⚠️ Rate limited; waiting ${diff / 1000} seconds...to fetch ${id}-${date}`);
+      console.log(`--> ⚠️ Rate limited; waiting ${diff / 1000} seconds...to fetch ${id} ${date}`);
       await new Promise((resolve) => setTimeout(resolve, diff + 2000)); // add 2sec to be safe
 
       return fetchInventory(id, date);
@@ -82,7 +83,7 @@ async function fetchInventory(id: number, date: string): Promise<LeapApiResponse
 async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: PrismaClient) {
   if (inventory.length === 0 || !inventory) return;
 
-  const StoreQuery = async (slot: ISlotResponse) => {
+  const StoreQuery = async (slot: ISlotLeapResponse) => {
     await prisma.slots.upsert({
       where: {
         productId_providerSlotId: {
@@ -90,7 +91,7 @@ async function StoreInventory(inventory: LeapApiResponse, id: number, prisma: Pr
           providerSlotId: slot.providerSlotId,
         },
       },
-      update: {},
+      update: {}, //in future, update the remaining count
       create: {
         startDate: new Date(slot.startDate),
         startTime: slot.startTime,

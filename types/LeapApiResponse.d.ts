@@ -1,6 +1,6 @@
-export type LeapApiResponse = Array<ISlotResponse>;
+export type LeapApiResponse = Array<ISlotLeapResponse>;
 
-export interface ISlotResponse {
+export interface ISlotLeapResponse {
   startDate: string;
   startTime: string;
   // endTime: string;
@@ -8,10 +8,10 @@ export interface ISlotResponse {
   remaining: number;
   // currencyCode: string;
   // variantId: number;
-  paxAvailability: Array<IPaxAvailability>;
+  paxAvailability: Array<IPaxAvailabilityLeap>;
 }
 
-interface IPaxAvailability {
+interface IPaxAvailabilityLeap {
   max: number;
   min: number;
   remaining: number;
@@ -19,10 +19,10 @@ interface IPaxAvailability {
   isPrimary?: boolean;
   description: string;
   name: string;
-  price: Price;
+  price: IPriceLeap;
 }
 
-interface IPrice {
+interface IPriceLeap {
   // discount: number;
   finalPrice: number;
   originalPrice: number;
